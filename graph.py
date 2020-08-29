@@ -49,7 +49,7 @@ class Grafo:
     def qtdVertices(self):
         """ Retorna o número de vértices """
         return self._nVertices
-    
+
     def qtdArestas(self):
         """ Retorna o número de arestas """
         return self._nEdges
@@ -75,20 +75,40 @@ class Grafo:
         return self._vector[v-1]
 
     def haAresta(self, u, v):
-        """ 
-            Retorna verdadeiro caso haja uma aresta entre 
+        """
+            Retorna verdadeiro caso haja uma aresta entre
             os vértices u e v, e falso caso contrário
         """
         return self._matrix[u-1][v-1] != self._INFINITY
 
     def peso(self, u, v):
-        """ 
+        """
             Retorna o peso da aresta u-v, se existir;
             caso contrário, retorna infinito positivo.
         """
         return self._matrix[u-1][v-1]
 
+#funções
+def busca(file,index):
+    graph = Grafo(file)
+    depth = 0
+    to_visit = [index]
+    visited = []
+    while to_visit:
+        print(f'{depth}: {",".join(str(v) for v in to_visit)}')
+        neighbors = []
+        for v in to_visit:
+            visited += [v]
+            u = [x[0] for x in graph.vizinhos(v)]
+            for vertex in u:
+                if vertex not in visited:
+                    neighbors += [vertex]
+                    visited += [vertex]
+        to_visit = neighbors
+        depth += 1
+
 if __name__ == "__main__":
     # No terminal, execute:
     # python graph.py ARQUIVO_DE_ENTRADA
     grafo = Grafo(sys.argv[1])
+    busca(sys.argv[1],61)
