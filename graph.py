@@ -116,15 +116,22 @@ def floyd_warshall(graph):
                 line.append(0)
             else:
                 line.append(graph.peso(vertex,intern))
+        matrix.append(line)
 
     for k in range(graph.qtdVertices()):
         new_matrix = []
         for u in range(graph.qtdVertices()):
             new_line = []
             for v in range(graph.qtdVertices()):
-                new_line.append = min(matrix[u][v],matrix[u][k]+matrix[k][v])
+                new_line.append(min(matrix[u][v],matrix[u][k]+matrix[k][v]))
             new_matrix.append(new_line)
         matrix = new_matrix
+
+    #printa
+    count = 1
+    for v in range(graph.qtdVertices()):
+        print(f'{count}: {",".join(str(u) for u in new_matrix[v])}')
+        count += 1
 
     return new_matrix
 
@@ -133,4 +140,5 @@ if __name__ == "__main__":
     # No terminal, execute:
     # python graph.py ARQUIVO_DE_ENTRADA
     grafo = Grafo(sys.argv[1])
-    busca(sys.argv[1],61)
+    # busca(sys.argv[1],61)
+    floyd_warshall(grafo)
