@@ -107,6 +107,28 @@ def busca(file,index):
         to_visit = neighbors
         depth += 1
 
+def floyd_warshall(graph):
+    matrix = []
+    for vertex in range(graph.qtdVertices()):
+        line = []
+        for intern in range(graph.qtdVertices()):
+            if vertex == intern:
+                line.append(0)
+            else:
+                line.append(graph.peso(vertex,intern))
+
+    for k in range(graph.qtdVertices()):
+        new_matrix = []
+        for u in range(graph.qtdVertices()):
+            new_line = []
+            for v in range(graph.qtdVertices()):
+                new_line.append = min(matrix[u][v],matrix[u][k]+matrix[k][v])
+            new_matrix.append(new_line)
+        matrix = new_matrix
+
+    return new_matrix
+
+
 if __name__ == "__main__":
     # No terminal, execute:
     # python graph.py ARQUIVO_DE_ENTRADA
