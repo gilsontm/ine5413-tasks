@@ -129,7 +129,7 @@ def floyd_warshall(graph):
             new_matrix.append(new_line)
         matrix = new_matrix
 
-    #printa
+    # Print
     count = 1
     for v in range(graph.qtdVertices()):
         print(f'{count}: {",".join(str(u) for u in new_matrix[v])}')
@@ -143,9 +143,13 @@ def dijkstra(file, s):
     DISTANCE, INDEX, VALID = range(3)
     graph = Grafo(file)
     # Inicializa vetor de distâncias
-    distances = [0] + ([sys.maxsize] * (graph.qtdVertices() - 1))
+    distances = [sys.maxsize] * graph.qtdVertices()
+    distances[s-1] = 0
+    # Inicializa o vetor de ancestrais
+    ancestors = [None] * graph.qtdVertices()
+    ancestors[s-1] = s
     # Inicializa heap com campos [DISTANCE, INDEX, VALID]
-    heap = [[distance, index, True] for index, distance in enumerate(distances)]
+    heap = [[0, s, True]] + [[distances[i], i, True] for i in range(len(distances)) if i != (s-1)]
     while heap:
         # Remove da heap o elemento de menor distância 
         vertex = heapq.heappop(heap)
@@ -159,6 +163,7 @@ def dijkstra(file, s):
             if distances[neighbor[0]-1] > new_distance:
                 # Atualiza a distância no vetor de distâncias
                 distances[neighbor[0]-1] = new_distance
+                ancestors[neighbor[0]-1] = vertex[INDEX]
                 for i in range(len(heap)):
                     if heap[i][INDEX] == neighbor[0]-1:
                         # Invalida o registro antigo deste vizinho na heap
@@ -166,7 +171,22 @@ def dijkstra(file, s):
                         # Insere-o novamente, com a distância atualizada
                         heapq.heappush(heap, [new_distance, neighbor[0], True])
                         break
-    return distances
+
+    # Print
+    for i in range(len(distances)):
+        path = []
+        if ancestors[i] is not None:
+            path.append(str(i+1))
+            if (i+1) != s:
+                index = i
+                while True:
+                    path.append(str(ancestors[index]))
+                    if ancestors[index] == s: break
+                    index = ancestors[index] - 1
+            path.reverse()
+        print(f"{i+1}: {','.join(path)}; d={distances[i]}")
+
+    return distances, ancestors
 
 if __name__ == "__main__":
     # No terminal, execute:
