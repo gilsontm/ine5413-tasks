@@ -1,4 +1,5 @@
 import sys
+import heapq
 
 class Grafo:
     """
@@ -88,7 +89,7 @@ class Grafo:
         """
         return self._matrix[u-1][v-1]
 
-#funções
+# Busca em largura
 def busca(file,index):
     graph = Grafo(file)
     depth = 0
@@ -107,6 +108,7 @@ def busca(file,index):
         to_visit = neighbors
         depth += 1
 
+# Floyd-Warshall
 def floyd_warshall(graph):
     matrix = []
     for vertex in range(graph.qtdVertices()):
@@ -135,10 +137,41 @@ def floyd_warshall(graph):
 
     return new_matrix
 
+# Dijkstra
+def dijkstra(file, s):
+    # Constantes
+    DISTANCE, INDEX, VALID = range(3)
+    graph = Grafo(file)
+    # Inicializa vetor de distâncias
+    distances = [0] + ([sys.maxsize] * (graph.qtdVertices() - 1))
+    # Inicializa heap com campos [DISTANCE, INDEX, VALID]
+    heap = [[distance, index, True] for index, distance in enumerate(distances)]
+    while heap:
+        # Remove da heap o elemento de menor distância 
+        vertex = heapq.heappop(heap)
+        # Se o elemento tiver sido marcado como inválido, desconsidere-o
+        if not vertex[VALID]: continue
+        # Para cada vizinho do elemento selecionado...
+        neighbors = graph.vizinhos(vertex[INDEX])
+        for neighbor in neighbors:
+            new_distance = distances[vertex[INDEX]-1] + graph.peso(vertex[INDEX], neighbor[0])
+            # Se a distância passando pelo elemento selecionado for melhor que a anterior...
+            if distances[neighbor[0]-1] > new_distance:
+                # Atualiza a distância no vetor de distâncias
+                distances[neighbor[0]-1] = new_distance
+                for i in range(len(heap)):
+                    if heap[i][INDEX] == neighbor[0]-1:
+                        # Invalida o registro antigo deste vizinho na heap
+                        heap[i][VALID] == False
+                        # Insere-o novamente, com a distância atualizada
+                        heapq.heappush(heap, [new_distance, neighbor[0], True])
+                        break
+    return distances
 
 if __name__ == "__main__":
     # No terminal, execute:
     # python graph.py ARQUIVO_DE_ENTRADA
-    grafo = Grafo(sys.argv[1])
+    # grafo = Grafo(sys.argv[1])
     # busca(sys.argv[1],61)
-    floyd_warshall(grafo)
+    # floyd_warshall(grafo)
+    data = dijkstra(sys.argv[1], 1)
