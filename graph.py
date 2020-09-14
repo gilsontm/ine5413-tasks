@@ -245,8 +245,9 @@ def eulerian_circuit_search(g, v, c):
     # Para cada vértice desse subciclo...
     for j in range(0, len(circuit)):
         x = circuit[j]
-        for a in c[x-1]:
-            if a == False and g.haAresta(v+1,i+1):
+        vizinhos = g.vizinhos(x)
+        for a in vizinhos:
+            if c[x-1][a[0]-1] == False:
             # que tenha alguma aresta não visitada...
                 # Busque um novo subciclo.
                 (is_circuit, sub_circuit) = eulerian_circuit_search(g, x, c)
