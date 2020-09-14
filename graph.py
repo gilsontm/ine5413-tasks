@@ -189,11 +189,18 @@ def dijkstra(file, s):
     return distances, ancestors
 
 # Ciclo Euleriano
-def eulerian_circuit(file):
-    g = Grafo(file)
+def eulerian_circuit(g):
     v = 1
 
-    (is_circuit,circuit) = eulerian_circuit_search(g, v)
+    c = [[True] * g.qtdVertices() for _ in range(g.qtdVertices())]
+
+
+    for i in range(0,g.qtdVertices()):
+        for j in range(0,g.qtdVertices()):
+            if g.haAresta(i+1,j+1):
+                c[i][j] = False
+
+    (is_circuit,circuit) = eulerian_circuit_search(g, v, c)
     
     if is_circuit == False:
         print(0)
@@ -201,34 +208,33 @@ def eulerian_circuit(file):
         if g.qtdArestas() != (len(circuit)-1):
             print(0)
             return
-        # Se é um ciclo e todas as arestas foram visitadas
+        # Se é um ciclo e todas as arestas estão no ciclo
         print(1)
         print(f'{",".join(str(v) for v in circuit)}')
     
         
 # Recursão Ciclo Euleriano
-def eulerian_circuit_search(g, v):
+def eulerian_circuit_search(g, v, c):
     circuit = [v]
     v = v - 1
     v0 = v
-
     # Adiciona uma trilha ao ciclo até que...
     while True:
         i = 0
         u = -1
-        for a in g._matrix[v]:
-            if a < g._INFINITY:
+        for a in c[v]:
+            if a == False and g.haAresta(v+1,i+1):
                 u = i
                 break
             i = i + 1
         # Ou o vértice no fim da trilha não tenha arestas ainda não visitadas;
         if u == -1:
             return (False, None)
-        else:
-            # (Quando um vértice é visitado o mesmo é retirado do grafo inicial)
-            g._matrix[v][u] = g._INFINITY
-            g._matrix[u][v] = g._INFINITY
+        else: # (Quando um vértice é visitado...)
+            c[v][u] = True
+            c[u][v] = True
             v = u
+            # (Adiciona o vértice na trilha)
             circuit.append(v+1)
         # Ou o vértice de partida é o mesmo que o atual (fechando um subciclo).
         if v == v0:
@@ -236,13 +242,14 @@ def eulerian_circuit_search(g, v):
 
     # Se há um subciclo
     
-    # Para cada vértice desse subciclo que tenha alguma aresta não visitada...
+    # Para cada vértice desse subciclo...
     for j in range(0, len(circuit)):
         x = circuit[j]
-        for a in g._matrix[x-1]:
-            if a < g._INFINITY:
+        for a in c[x-1]:
+            if a == False and g.haAresta(v+1,i+1):
+            # que tenha alguma aresta não visitada...
                 # Busque um novo subciclo.
-                (is_circuit, sub_circuit) = eulerian_circuit_search(g, x)
+                (is_circuit, sub_circuit) = eulerian_circuit_search(g, x, c)
                 if is_circuit == False:
                     return (False, None)
                 # Se encontrado, adiciona o novo subciclo no lugar do vértice.
@@ -253,8 +260,8 @@ def eulerian_circuit_search(g, v):
 if __name__ == "__main__":
     # No terminal, execute:
     # python graph.py ARQUIVO_DE_ENTRADA
-    # grafo = Grafo(sys.argv[1])
+    grafo = Grafo(sys.argv[1])
     # busca(sys.argv[1],61)
     # floyd_warshall(grafo)
     # data = dijkstra(sys.argv[1], 1)
-    data = eulerian_circuit(sys.argv[1])
+    data = eulerian_circuit(grafo)
