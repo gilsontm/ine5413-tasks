@@ -94,12 +94,11 @@ def busca(file,index):
     graph = Grafo(file)
     depth = 0
     to_visit = [index]
-    visited = []
+    visited = [index]
     while to_visit:
         print(f'{depth}: {",".join(str(v) for v in to_visit)}')
         neighbors = []
         for v in to_visit:
-            visited += [v]
             u = [x[0] for x in graph.vizinhos(v)]
             for vertex in u:
                 if vertex not in visited:
@@ -132,10 +131,10 @@ def floyd_warshall(graph):
     # Print
     count = 1
     for v in range(graph.qtdVertices()):
-        print(f'{count}: {",".join(str(u) for u in new_matrix[v])}')
+        print(f'{count}: {",".join(str(u) for u in matrix[v])}')
         count += 1
 
-    return new_matrix
+    return matrix
 
 # Dijkstra
 def dijkstra(file, s):
@@ -151,7 +150,7 @@ def dijkstra(file, s):
     # Inicializa heap com campos [DISTANCE, INDEX, VALID]
     heap = [[0, s, True]] + [[distances[i], i, True] for i in range(len(distances)) if i != (s-1)]
     while heap:
-        # Remove da heap o elemento de menor distância 
+        # Remove da heap o elemento de menor distância
         vertex = heapq.heappop(heap)
         # Se o elemento tiver sido marcado como inválido, desconsidere-o
         if not vertex[VALID]: continue
@@ -201,7 +200,7 @@ def eulerian_circuit(g):
                 c[i][j] = False
 
     (is_circuit,circuit) = eulerian_circuit_search(g, v, c)
-    
+
     if is_circuit == False:
         print(0)
     else:
@@ -211,8 +210,7 @@ def eulerian_circuit(g):
         # Se é um ciclo e todas as arestas estão no ciclo
         print(1)
         print(f'{",".join(str(v) for v in circuit)}')
-    
-        
+
 # Recursão Ciclo Euleriano
 def eulerian_circuit_search(g, v, c):
     circuit = [v]
@@ -241,7 +239,7 @@ def eulerian_circuit_search(g, v, c):
             break
 
     # Se há um subciclo
-    
+
     # Para cada vértice desse subciclo...
     for j in range(0, len(circuit)):
         x = circuit[j]
@@ -263,6 +261,6 @@ if __name__ == "__main__":
     # python graph.py ARQUIVO_DE_ENTRADA
     grafo = Grafo(sys.argv[1])
     # busca(sys.argv[1],61)
-    # floyd_warshall(grafo)
+    floyd_warshall(grafo)
     # data = dijkstra(sys.argv[1], 1)
-    data = eulerian_circuit(grafo)
+    # data = eulerian_circuit(grafo)
