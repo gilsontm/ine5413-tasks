@@ -90,8 +90,11 @@ class Grafo:
         return self._matrix[u-1][v-1]
 
 # Busca em largura
-def busca(file,index):
-    graph = Grafo(file)
+def busca(graph, index):
+    """
+        / graph: Grafo de entrada
+        / index: índice do vértice de entrada
+    """
     depth = 0
     to_visit = [index]
     visited = [index]
@@ -109,6 +112,9 @@ def busca(file,index):
 
 # Floyd-Warshall
 def floyd_warshall(graph):
+    """
+        / graph: Grafo de entrada
+    """
     matrix = []
     for vertex in range(graph.qtdVertices()):
         line = []
@@ -137,10 +143,13 @@ def floyd_warshall(graph):
     return matrix
 
 # Dijkstra
-def dijkstra(file, s):
+def dijkstra(graph, s):
+    """
+        / graph: Grafo de entrada
+        / s: índice do vértice de entrada
+    """
     # Constantes
     DISTANCE, INDEX, VALID = range(3)
-    graph = Grafo(file)
     # Inicializa vetor de distâncias
     distances = [sys.maxsize] * graph.qtdVertices()
     distances[s-1] = 0
@@ -166,7 +175,7 @@ def dijkstra(file, s):
                 for i in range(len(heap)):
                     if heap[i][INDEX] == neighbor[0]-1:
                         # Invalida o registro antigo deste vizinho na heap
-                        heap[i][VALID] == False
+                        heap[i][VALID] = False
                         # Insere-o novamente, com a distância atualizada
                         heapq.heappush(heap, [new_distance, neighbor[0], True])
                         break
@@ -189,6 +198,9 @@ def dijkstra(file, s):
 
 # Ciclo Euleriano
 def eulerian_circuit(g):
+    """
+        / g: Grafo de entrada
+    """
     v = 1
 
     c = [[True] * g.qtdVertices() for _ in range(g.qtdVertices())]
@@ -260,7 +272,11 @@ if __name__ == "__main__":
     # No terminal, execute:
     # python graph.py ARQUIVO_DE_ENTRADA
     grafo = Grafo(sys.argv[1])
-    # busca(sys.argv[1],61)
+    print("Busca em largura")
+    busca(grafo, 1)
+    print("\nFloyd-Washall")
     floyd_warshall(grafo)
-    # data = dijkstra(sys.argv[1], 1)
-    # data = eulerian_circuit(grafo)
+    print("\nDijkstra")
+    dijkstra(grafo, 1)
+    print("\nCiclo euleriano")
+    eulerian_circuit(grafo)
