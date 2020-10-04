@@ -216,16 +216,17 @@ def eulerian_circuit(g):
     if is_circuit == False:
         print(0)
     else:
-        if g.qtdArestas() != (len(circuit)-1):
+        if g.qtdArestas() != (circuit._size-1):
             print(0)
             return
         # Se é um ciclo e todas as arestas estão no ciclo
         print(1)
-        print(f'{",".join(str(v) for v in circuit)}')
+        print(f'{",".join(str(v) for v in circuit.to_list())}')
 
 # Recursão Ciclo Euleriano
 def eulerian_circuit_search(g, v, c):
-    circuit = [v]
+    circuit = DLList(v)
+
     v = v - 1
     v0 = v
     # Adiciona uma trilha ao ciclo até que...
@@ -253,8 +254,9 @@ def eulerian_circuit_search(g, v, c):
     # Se há um subciclo
 
     # Para cada vértice desse subciclo...
-    for j in range(0, len(circuit)):
-        x = circuit[j]
+    node = (circuit._begin)
+    for j in range(0, circuit._size):
+        x = node._value
         vizinhos = g.vizinhos(x)
         for a in vizinhos:
             if c[x-1][a[0]-1] == False:
@@ -264,9 +266,42 @@ def eulerian_circuit_search(g, v, c):
                 if is_circuit == False:
                     return (False, None)
                 # Se encontrado, adiciona o novo subciclo no lugar do vértice.
-                circuit[j:j+1] = sub_circuit
+                node.replace(sub_circuit)
+        node = node._next
     # Retorne o ciclo.
     return (True, circuit)
+
+
+class node:
+    def __init__(self, value, next, prev):
+        self._value = value
+        self._next = next
+        self._prev = prev
+    def replace(self,dllist):
+        (self._prev).next = dllist._begin
+        (self._next).prev = dllist._end
+
+class DLList:
+    def __init__(self, value):
+        self._begin = node(value,None,None)
+        self._end = None
+        self._size = 1
+    def append(self, value):
+        if self._size == 1:
+            self._end = node(value, None, self._begin)
+            (self._begin)._next = self._end
+        else:
+            temp = self._end
+            self._end = node(value, None, temp)
+            temp._next = self._end
+        self._size = self._size + 1
+    def to_list(self):
+        alist = []
+        node = self._begin
+        while node != None:
+            alist.append(node._value)
+            node = node._next
+        return alist
 
 if __name__ == "__main__":
     # No terminal, execute:
