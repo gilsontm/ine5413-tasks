@@ -122,7 +122,7 @@ def floyd_warshall(graph):
             if vertex == intern:
                 line.append(0)
             else:
-                line.append(graph.peso(vertex,intern))
+                line.append(graph.peso(vertex+1,intern+1))
         matrix.append(line)
 
     for k in range(graph.qtdVertices()):
