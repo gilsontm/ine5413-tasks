@@ -16,7 +16,7 @@ class Grafo:
         são indexadas em 0.
     """
 
-    def __init__(self, filename, is_directed):
+    def __init__(self, filename):
         """
             Construtor da classe, recebe como parâmetro
             o nome do arquivo de entrada que contém as
@@ -36,7 +36,7 @@ class Grafo:
             self._vector = [[] for _ in range(n)]
 
             # Pula a linha que contém '*edges'
-            file.readline()
+            self._directed = file.readline() == "*arcs\n"
             # Lê todas as linhas subsequentes
             edges = file.readlines()
             self._nEdges = len(edges)
@@ -45,7 +45,7 @@ class Grafo:
                 a = int(a)-1; b = int(b)-1; weight = float(weight)
                 self._matrix[a][b] = weight
                 self._vector[a].append((b+1, weight))
-                if is_directed == False:
+                if self._directed == False:
                     self._matrix[b][a] = weight
                     self._vector[b].append((a+1, weight))
 
@@ -95,15 +95,19 @@ class Grafo:
 #ordenacao topologica
 def topological_sorting(g):
     #Lista ordenada
-    s = []
+    if g._directed == False:
+        print("Grafo não dirigido")
+        return
+
+    s = DLList()
     #Lista que indica os vértices já visitados
     c = [False] * g.qtdVertices()
 
     for v in range(1, g.qtdVertices()+1):
         if c[v-1] == False:
-            s = topological_sorting_visit(g, v, c, s)
+            topological_sorting_visit(g, v, c, s)
 
-    print(f'{"->".join(v for v in s)}')
+    print(f'{"->".join(v for v in s.to_list())}')
 
 def topological_sorting_visit(g, v, c, s):
     """
@@ -119,14 +123,62 @@ def topological_sorting_visit(g, v, c, s):
                 Recursivamente visita e coloca os vizinhos 
                 ainda não ordenados no topo da ordenação
             """
-            s = topological_sorting_visit(g, u[0], c, s)
+            topological_sorting_visit(g, u[0], c, s)
 
     #Coloca v no topo da ordenação
-    return [g.rotulo(v)]+s
+    s.prepend(g.rotulo(v))
+
+
+class node:
+    def __init__(self, value, next, prev):
+        self._value = value
+        self._next = next
+        self._prev = prev
+    def replace(self,dllist):
+        (self._prev).next = dllist._begin
+        (self._next).prev = dllist._end
+
+class DLList:
+    def __init__(self):
+        """
+            O primeiro valor coloquei um vazio pra não mudar
+            o que já tinha implementado. No t1 essa DLList precisava
+            de um valor pra ser inicializado
+        """
+        self._begin = node(None,None,None)
+        self._end = None
+        self._size = 0
+    def append(self, value):
+        if self._size == 0:
+            self._end = node(value, None, self._begin)
+            (self._begin)._next = self._end
+        else:
+            temp = self._end
+            self._end = node(value, None, temp)
+            temp._next = self._end
+        self._size = self._size + 1
+    def prepend(self, value):
+        if self._size == 0:
+            self._end = node(value, None, self._begin)
+            (self._begin)._next = self._end
+        else:
+            temp = (self._begin)._next
+            new = node(value, temp, self._begin)
+            (self._begin)._next = new
+            temp._prev = new
+        self._size = self._size + 1
+    def to_list(self):
+        alist = []
+        node = (self._begin)._next #pula o primeir q é o vazio
+        while node != None:
+            alist.append(node._value)
+            node = node._next
+        return alist
+
 
 if __name__ == "__main__":
     # No terminal, execute:
     # python graph.py ARQUIVO_DE_ENTRADA
-    grafoDirigido = Grafo(sys.argv[1],True)
+    grafo = Grafo(sys.argv[1])
     print("Ordenação Topológica")
-    topological_sorting(grafoDirigido)
+    topological_sorting(grafo)
