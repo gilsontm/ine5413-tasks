@@ -114,13 +114,13 @@ def topological_sorting_visit(g, v, c, s):
         Concatena em s a ordem topológica a partir de v
         considerando os vertices ainda não visitados
     """
-    #Indica que o vérice foi visitado
+    #Indica que o vértice foi visitado
     c[v-1] = True
 
     for u in g.vizinhos(v):
         if c[u[0]-1] == False:
             """
-                Recursivamente visita e coloca os vizinhos 
+                Recursivamente visita e coloca os vizinhos
                 ainda não ordenados no topo da ordenação
             """
             topological_sorting_visit(g, u[0], c, s)
@@ -128,6 +128,27 @@ def topological_sorting_visit(g, v, c, s):
     #Coloca v no topo da ordenação
     s.prepend(g.rotulo(v))
 
+#algoritmo de kruskal
+def kruskal(graph):
+
+    a = set()
+
+    s = {}
+
+    for v in range(graph.qtdVertices()):
+        s[v] = {v}
+
+    e = [(a,b) for a,b in product(range(graph.qtdVertices()),repeat=2) if graph.haAresta(a,b)]
+    sort(e,key= lambda k: graph.peso(k[0],k[1]))
+
+    for u,v in e:
+        if s[u] != s[v]:
+            a |= {u,v}
+            x = (s[u] | s[v])
+            for y in x:
+                s[y] = x
+
+    return a
 
 class node:
     def __init__(self, value, next, prev):
