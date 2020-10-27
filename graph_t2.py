@@ -1,5 +1,7 @@
 import sys
 import heapq
+from itertools import product
+
 
 class Grafo:
     """
@@ -132,23 +134,34 @@ def topological_sorting_visit(g, v, c, s):
 def kruskal(graph):
 
     a = set()
-
     s = {}
-
-    for v in range(graph.qtdVertices()):
+    #para cada vértice do grafo cria uma chave no dicionário
+    for v in range(1, graph.qtdVertices()+1):
         s[v] = {v}
 
-    e = [(a,b) for a,b in product(range(graph.qtdVertices()),repeat=2) if graph.haAresta(a,b)]
-    sort(e,key= lambda k: graph.peso(k[0],k[1]))
+    #cria uma lista com todas as arestas do grafo
+    e = [(a,b) for a,b in product(range(1, graph.qtdVertices()+1),repeat=2) if graph.haAresta(a,b)]
+    #deixa a lista ordenada pela ordem crescente do peso das arestas
+    e = sorted(e,key= lambda k: graph.peso(k[0],k[1]))
 
+    replacement = []
     for u,v in e:
         if s[u] != s[v]:
             a |= {u,v}
             x = (s[u] | s[v])
             for y in x:
                 s[y] = x
+            replacement += [(u,v)]
 
-    return a
+    #prints
+    to_print = []
+    result = 0
+    for x,y in replacement:
+        result += graph.peso(x,y)
+        to_print += [f'{x}-{y}']
+
+    print(result)
+    print(', '.join(to_print))
 
 class node:
     def __init__(self, value, next, prev):
@@ -201,5 +214,6 @@ if __name__ == "__main__":
     # No terminal, execute:
     # python graph.py ARQUIVO_DE_ENTRADA
     grafo = Grafo(sys.argv[1])
-    print("Ordenação Topológica")
-    topological_sorting(grafo)
+    # print("Ordenação Topológica")
+    # topological_sorting(grafo)
+    kruskal(grafo)
