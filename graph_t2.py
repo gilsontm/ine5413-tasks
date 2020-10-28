@@ -133,7 +133,6 @@ def topological_sorting_visit(g, v, c, s):
 #algoritmo de kruskal
 def kruskal(graph):
 
-    a = set()
     s = {}
     #para cada vértice do grafo cria uma chave no dicionário
     for v in range(1, graph.qtdVertices()+1):
@@ -147,7 +146,6 @@ def kruskal(graph):
     replacement = []
     for u,v in e:
         if s[u] != s[v]:
-            a |= {u,v}
             x = (s[u] | s[v])
             for y in x:
                 s[y] = x
