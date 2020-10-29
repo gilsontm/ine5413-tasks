@@ -1,5 +1,4 @@
 import sys
-import heapq
 from itertools import product
 
 
@@ -47,7 +46,7 @@ class Grafo:
                 a = int(a)-1; b = int(b)-1; weight = float(weight)
                 self._matrix[a][b] = weight
                 self._vector[a].append((b+1, weight))
-                if self._directed == False:
+                if not self._directed:
                     self._matrix[b][a] = weight
                     self._vector[b].append((a+1, weight))
 
@@ -93,6 +92,89 @@ class Grafo:
             caso contrário, retorna infinito positivo.
         """
         return self._matrix[u-1][v-1]
+
+    def transposto(self):
+        """
+            Cria e retorna um novo grafo que corresponde
+            ao grafo inicial transposto.
+        """
+        graph = Grafo.__new__(Grafo)
+        graph._nVertices = self._nVertices
+        graph._nEdges = self._nEdges
+        graph._INFINITY = self._INFINITY
+        graph._labels = self._labels.copy()
+        graph._directed = self._directed
+
+        # transpõe a matriz de adjacências
+        matrix = [[0] * self._nVertices for _ in range(self._nVertices)]
+        for i in range(self._nVertices):
+            for j in range(self._nVertices):
+                matrix[j][i] = self._matrix[i][j]
+        graph._matrix = matrix
+
+        # transpõe o vetor de adjacências
+        vector = [[] for _ in range(self._nVertices)]
+        for v in range(self._nVertices):
+            for (u, weight) in self._vector[v]:
+                vector[u-1].append((v+1, weight))
+        graph._vector = vector
+
+        return graph
+
+# componentes fortemente conexas
+def strongly_connected_components(graph):
+    C, T, A, F = depth_first_search(graph)
+    graph_transposed = graph.transposto()
+    Ct, Tt, At, Ft = depth_first_search(graph_transposed, ordered_by=F)
+
+    # imprimir componentes
+    components = {}
+    for i in range(len(At)):
+        if At[i] is None:
+            components[i+1] = [i+1]
+        else:
+            index = i
+            while At[index-1] is not None:
+                index = At[index-1]
+            components[index].append(i+1)
+    for c in components:
+        components[c].sort()
+        print(",".join(map(str, components[c])))
+    return At
+
+def depth_first_search(graph, ordered_by=None):
+    n = graph.qtdVertices()
+    C = [False] * n
+    T = [sys.maxsize] * n
+    F = [sys.maxsize] * n
+    A = [None] * n
+    tempo = 0
+
+    # suporte ao algoritmo DFS adaptado, usado pelo algoritmo 15 da apostila
+    if ordered_by is not None:
+        vertices = [(ordered_by[i-1], i) for i in range(1, n+1)]
+        vertices.sort(reverse=True)
+        vertices = [u for (_, u) in vertices]
+    else:
+        vertices = range(1, n+1)
+
+    for u in vertices:
+        if not C[u-1]:
+            tempo = depth_first_search_visit(graph, u, C, T, A, F, tempo)
+    return (C, T, A, F)
+
+def depth_first_search_visit(graph, u, C, T, A, F, tempo):
+    C[u-1] = True
+    tempo += 1
+    T[u-1] = tempo
+    vizinhos = graph.vizinhos(u)
+    for (v, _) in vizinhos:
+        if not C[v-1]:
+            A[v-1] = u
+            tempo = depth_first_search_visit(graph, v, C, T, A, F, tempo)
+    tempo += 1
+    F[u-1] = tempo
+    return tempo
 
 #ordenacao topologica
 def topological_sorting(g):
@@ -212,6 +294,12 @@ if __name__ == "__main__":
     # No terminal, execute:
     # python graph.py ARQUIVO_DE_ENTRADA
     grafo = Grafo(sys.argv[1])
-    # print("Ordenação Topológica")
-    # topological_sorting(grafo)
+
+    print("Componentes fortemente conexas")
+    strongly_connected_components(grafo)
+
+    print("\nOrdenação topológica")
+    topological_sorting(grafo)
+
+    print("\nKruskal")
     kruskal(grafo)
