@@ -183,17 +183,18 @@ def topological_sorting(g):
         print("Grafo não dirigido")
         return
 
-    s = DLList()
+    s = [None] * g.qtdVertices()
+    i = g.qtdVertices()-1;
     #Lista que indica os vértices já visitados
     c = [False] * g.qtdVertices()
 
     for v in range(1, g.qtdVertices()+1):
         if c[v-1] == False:
-            topological_sorting_visit(g, v, c, s)
+            i = topological_sorting_visit(g, v, c, s, i)
 
-    print(f'{"->".join(v for v in s.to_list())}')
+    print(f'{"->".join(v for v in s)}')
 
-def topological_sorting_visit(g, v, c, s):
+def topological_sorting_visit(g, v, c, s, i):
     """
         Concatena em s a ordem topológica a partir de v
         considerando os vertices ainda não visitados
@@ -207,10 +208,14 @@ def topological_sorting_visit(g, v, c, s):
                 Recursivamente visita e coloca os vizinhos
                 ainda não ordenados no topo da ordenação
             """
-            topological_sorting_visit(g, u[0], c, s)
+            i = topological_sorting_visit(g, u[0], c, s, i)
 
     #Coloca v no topo da ordenação
-    s.prepend(g.rotulo(v))
+    s[i] = g.rotulo(v)
+
+    i = i - 1
+
+    return i
 
 #algoritmo de kruskal
 def kruskal(graph):
@@ -242,52 +247,6 @@ def kruskal(graph):
 
     print(result)
     print(', '.join(to_print))
-
-class node:
-    def __init__(self, value, next, prev):
-        self._value = value
-        self._next = next
-        self._prev = prev
-    def replace(self,dllist):
-        (self._prev).next = dllist._begin
-        (self._next).prev = dllist._end
-
-class DLList:
-    def __init__(self):
-        """
-            O primeiro valor coloquei um vazio pra não mudar
-            o que já tinha implementado. No t1 essa DLList precisava
-            de um valor pra ser inicializado
-        """
-        self._begin = node(None,None,None)
-        self._end = None
-        self._size = 0
-    def append(self, value):
-        if self._size == 0:
-            self._end = node(value, None, self._begin)
-            (self._begin)._next = self._end
-        else:
-            temp = self._end
-            self._end = node(value, None, temp)
-            temp._next = self._end
-        self._size = self._size + 1
-    def prepend(self, value):
-        if self._size == 0:
-            self._end = node(value, None, self._begin)
-            (self._begin)._next = self._end
-        else:
-            temp = (self._begin)._next
-            new = node(value, temp, self._begin)
-            (self._begin)._next = new
-            temp._prev = new
-        self._size = self._size + 1
-    def to_list(self):
-        alist = []
-        node = (self._begin)._next #pula o primeir q é o vazio
-        while node != None:
-            alist.append(node._value)
-            node = node._next
-        return alist
 
 
 if __name__ == "__main__":
