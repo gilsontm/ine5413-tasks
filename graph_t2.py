@@ -132,12 +132,15 @@ def strongly_connected_components(graph):
     components = {}
     for i in range(len(At)):
         if At[i] is None:
-            components[i+1] = [i+1]
+            if (i+1) not in components:
+                components[i+1] = [i+1]
         else:
             index = i
-            while At[index-1] is not None:
-                index = At[index-1]
-            components[index].append(i+1)
+            while At[index] is not None:
+                index = At[index] - 1
+            if (index+1) not in components:
+                components[index+1] = [index+1]
+            components[index+1].append(i+1)
     for c in components:
         components[c].sort()
         print(",".join(map(str, components[c])))
