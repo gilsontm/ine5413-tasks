@@ -29,7 +29,8 @@ class Grafo:
             n = int(file.readline().split()[-1])
             self._nVertices = n
             for _ in range(n):
-                self._labels.append(file.readline().split()[-1])
+                line = file.readline()
+                self._labels.append(line[line.index(" ")+1:-1])
 
             # Constrói uma matriz n por n
             self._matrix = [[self._INFINITY] * n for _ in range(n)]
@@ -184,7 +185,7 @@ def topological_sorting(g):
         return
 
     s = [None] * g.qtdVertices()
-    i = g.qtdVertices()-1;
+    i = g.qtdVertices()-1
     #Lista que indica os vértices já visitados
     c = [False] * g.qtdVertices()
 
