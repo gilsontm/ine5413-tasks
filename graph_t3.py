@@ -1,3 +1,7 @@
+import sys
+from collections import deque
+
+
 class Grafo:
     """
         Classe que representa um grafo ponderado.
@@ -13,14 +17,14 @@ class Grafo:
         são indexadas em 0.
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename, infinity=sys.maxsize):
         """
             Construtor da classe, recebe como parâmetro
             o nome do arquivo de entrada que contém as
             informações sobre o grafo.
         """
         self._labels = []
-        self._INFINITY = sys.maxsize
+        self._INFINITY = infinity
         with open(filename, "r") as file:
             n = int(file.readline().split()[-1])
             self._nVertices = n
@@ -33,7 +37,7 @@ class Grafo:
             # Constrói uma lista (tamanho n) de listas vazias
             self._vector = [[] for _ in range(n)]
 
-            # Pula a linha que contém '*edges'
+            # Lê a linha que contém '*edges' ou '*arcs'
             self._directed = file.readline() == "*arcs\n"
             # Lê todas as linhas subsequentes
             edges = file.readlines()
@@ -118,4 +122,70 @@ class Grafo:
 
         return graph
 
-# Coloracao de Vertices
+class RedeFluxo(Grafo):
+    """
+        Especialização da classe Grafo; representa uma rede de fluxo.
+    """
+    def __init__(self, filename):
+        super(RedeFluxo, self).__init__(filename, infinity=0)
+
+# fluxo máximo resultante 
+def edmonds_karp(flow_network, s, t):
+    n = flow_network.qtdVertices()
+    flows = [[0] * n for _ in range(n)]
+    while True:
+        path = breadth_first_search_edmonds_karp(flow_network, s, t, flows)
+        if path is None:
+            break
+        flow = sys.maxsize
+        for i in range(len(path)-1):
+            u = path[i]; v = path[i+1]
+            flow = min(flow, flow_network.peso(u, v) - flows[u-1][v-1])
+        for i in range(len(path)-1):
+            u = path[i]; v = path[i+1]
+            if flow_network.haAresta(u, v):
+                flows[u-1][v-1] += flow
+            else:
+                flows[v-1][u-1] -= flow
+    max_flow = 0
+    for row in flows:
+        max_flow += row[t-1]
+    print(f"Fluxo máximo resultante: {max_flow}")
+
+# busca em largura para o algoritmo de Edmonds-Karp
+def breadth_first_search_edmonds_karp(flow_network, s, t, flows):
+    n = flow_network.qtdVertices()
+    C = [False] * n
+    A = [None] * n
+    C[s-1] = True
+    queue = deque([s])
+    while queue:
+        u = queue.popleft()
+        neighbours = flow_network.vizinhos(u)
+        for (v, capacity) in neighbours:
+            if not C[v-1] and capacity > flows[u-1][v-1]:
+                C[v-1] = True
+                A[v-1] = u
+                if v == t:
+                    p = [t]
+                    w = t
+                    while w != s:
+                        w = A[w-1]
+                        p.append(w)
+                    p.reverse()
+                    return p
+                queue.append(v)
+    return None
+
+if __name__ == "__main__":
+    filename = sys.argv[1]
+
+    print("Edmonds-Karp")
+    flow_network = RedeFluxo(filename)
+    edmonds_karp(flow_network, 1, 5)
+
+    print("\nHopcraft-Karp")
+    # ...
+
+    print("\nColoração de vértices")
+    # ...
