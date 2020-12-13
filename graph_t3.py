@@ -231,9 +231,14 @@ def hopcroft_karp(graph):
             if mate[x-1] is None:
                 if depth_first_search(graph, mate, x, D):
                     m += 1
+    # imprimir
     print(f"Emparelhamento máximo: {m}")
+    for x in X:
+        if mate[x-1] is not None:
+            print(f"Par: {x}, {mate[x-1]}")
     return m, mate
 
+# busca em largura para o algoritmo de Hopcroft-Karp
 def breadth_first_search(graph, mate, D):
     X, _ = graph.particoes()
     queue = deque([])
@@ -257,6 +262,7 @@ def breadth_first_search(graph, mate, D):
                     queue.append(z)
     return D[None] < sys.maxsize
 
+# busca em profundidade para o algoritmo de Hopcroft-Karp
 def depth_first_search(graph, mate, x, D):
     if x is not None:
         neighbours = graph.vizinhos(x)
