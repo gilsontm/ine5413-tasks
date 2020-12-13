@@ -129,6 +129,48 @@ class RedeFluxo(Grafo):
     def __init__(self, filename):
         super(RedeFluxo, self).__init__(filename, infinity=0)
 
+class GrafoBipartido(Grafo):
+    """
+        Especialização da classe Grafo; representa um grafo bipartido.
+    """
+    def __init__(self, filename):
+        self._INFINITY = sys.maxsize
+        with open(filename, "r") as file:
+            # pula as três primeiras linhas
+            file.readline()
+            file.readline()
+            file.readline()
+            # lê a linha: p ["edges" ou "arcs"] [número de vértices] [número arestas]
+            _, directed, vertices, edges = file.readline().split(" ")
+            self._nVertices = n = int(vertices)
+            self._nEdges = int(edges)
+            self._directed = directed == "arcs"
+            self._labels = list(range(1, n+1))
+            # Constrói uma matriz n por n
+            self._matrix = [[self._INFINITY] * n for _ in range(n)]
+            # Constrói uma lista (tamanho n) de listas vazias
+            self._vector = [[] for _ in range(n)]
+            # Vértices são separados em duas partições: 1 e 2
+            self._partition1 = []
+            self._partition2 = []
+            # Lê todas as linhas subsequentes
+            edges = file.readlines()
+            for edge in edges:
+                _, a, b = edge.split()
+                a = int(a)-1; b = int(b)-1
+                self._matrix[a][b] = 1
+                self._vector[a].append((b+1, 1))
+                if not self._directed:
+                    self._matrix[b][a] = 1
+                    self._vector[b].append((a+1, 1))
+                if not ((a+1) in self._partition1):
+                    self._partition1.append(a+1)
+                if not ((b+1) in self._partition2):
+                    self._partition2.append(b+1)
+
+    def particoes(self):
+        return self._partition1, self._partition2
+
 # fluxo máximo resultante 
 def edmonds_karp(flow_network, s, t):
     n = flow_network.qtdVertices()
@@ -177,15 +219,67 @@ def breadth_first_search_edmonds_karp(flow_network, s, t, flows):
                 queue.append(v)
     return None
 
+# emparelhamento máximo
+def hopcroft_karp(graph):
+    X, _ = graph.particoes()
+    n = graph.qtdVertices()
+    D = {v : sys.maxsize for v in range(1, n+1)}
+    mate = [None] * n
+    m = 0
+    while breadth_first_search(graph, mate, D):
+        for x in X:
+            if mate[x-1] is None:
+                if depth_first_search(graph, mate, x, D):
+                    m += 1
+    print(f"Emparelhamento máximo: {m}")
+    return m, mate
+
+def breadth_first_search(graph, mate, D):
+    X, _ = graph.particoes()
+    queue = deque([])
+    for x in X:
+        if mate[x-1] is None:
+            D[x] = 0
+            queue.append(x)
+        else:
+            D[x] = sys.maxsize
+
+    D[None] = sys.maxsize
+    while queue:
+        x = queue.popleft()
+        if D[x] < D[None]:
+            neighbours = graph.vizinhos(x)
+            for (y, _) in neighbours:
+                # seja z o parceiro de y
+                z = mate[y-1]
+                if D[z] >= sys.maxsize:
+                    D[z] = D[x] + 1
+                    queue.append(z)
+    return D[None] < sys.maxsize
+
+def depth_first_search(graph, mate, x, D):
+    if x is not None:
+        neighbours = graph.vizinhos(x)
+        for (y, _) in neighbours:
+            if D[mate[y-1]] == D[x] + 1:
+                if depth_first_search(graph, mate, mate[y-1], D):
+                    mate[y-1] = x
+                    mate[x-1] = y
+                    return True
+        D[x] = sys.maxsize
+        return False
+    return True
+
 if __name__ == "__main__":
     filename = sys.argv[1]
 
-    print("Edmonds-Karp")
-    flow_network = RedeFluxo(filename)
-    edmonds_karp(flow_network, 1, 5)
+    # print("Edmonds-Karp")
+    # flow_network = RedeFluxo(filename)
+    # edmonds_karp(flow_network, 1, 5)
 
-    print("\nHopcraft-Karp")
-    # ...
+    print("\nHopcroft-Karp")
+    graph = GrafoBipartido(filename)
+    hopcroft_karp(graph)
 
     print("\nColoração de vértices")
     # ...
