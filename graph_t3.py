@@ -171,6 +171,7 @@ class GrafoBipartido(Grafo):
     def particoes(self):
         return self._partition1, self._partition2
 
+
 # fluxo máximo resultante 
 def edmonds_karp(flow_network, s, t):
     n = flow_network.qtdVertices()
@@ -218,6 +219,7 @@ def breadth_first_search_edmonds_karp(flow_network, s, t, flows):
                     return p
                 queue.append(v)
     return None
+
 
 # emparelhamento máximo
 def hopcroft_karp(graph):
@@ -276,16 +278,87 @@ def depth_first_search(graph, mate, x, D):
         return False
     return True
 
+
+# coloração de vértices
+def lawler(graph):
+    n = graph.qtdVertices()
+    X = [sys.maxsize] * (1 << n)
+    X[0] = 0
+    SS = power_set(list(range(1, n+1)))
+    for s in SS:
+        if s == 0: continue
+        S = SS[s]
+        II = independent_sets(graph, S)
+        for I in II:
+            i = f(SS, S.difference(I))
+            if X[i] + 1 < X[s]:
+                X[s] = X[i] + 1
+    # atribuir número cromático a cada vértice
+    color_groups = [[] for _ in range(X[-1])]
+    for u in range(1, n+1):
+        for group in color_groups:
+            try:
+                for v in group:
+                    if graph.haAresta(u, v) or graph.haAresta(v, u):
+                        raise Exception()
+            except:
+                continue
+            else:
+                group.append(u)
+                break
+    # imprimir
+    print(f"Coloração mínima: {X[-1]}")
+    for i in range(len(color_groups)):
+        group = color_groups[i]
+        strings = [str(e) for e in group]
+        print(f"Nº cromático {i+1}: {', '.join(strings)}")
+
+# retorna o conjunto potência enumerado
+def power_set(elements):
+    powerset = {}
+    for i in range(1 << len(elements)):
+        powerset[i] = set([elements[j] for j in range(len(elements)) if (i & (1 << j))])
+    return powerset
+
+# retorna o número atribuído a um elemento do conjunto potência
+def f(powerset, subset):
+    for i in powerset:
+        if powerset[i] == subset:
+            return i
+    return -1
+
+# retorna os subconjuntos independentes de um conjunto de vértices do grafo
+def independent_sets(graph, subset):
+    II = []
+    SS = power_set(list(subset))
+    for s in SS:
+        S = SS[s]
+        try:
+            for u in S:
+                for v in S:
+                    if u != v and (graph.haAresta(u, v) or graph.haAresta(v, u)):
+                        raise Exception()
+        except:
+            continue
+        else:
+            II.append(S)
+    return II
+
+
 if __name__ == "__main__":
     filename = sys.argv[1]
 
+    """ Para executar o Edmonds-Karp, instancie a classe RedeFluxo """
     # print("Edmonds-Karp")
     # flow_network = RedeFluxo(filename)
-    # edmonds_karp(flow_network, 1, 5)
+    # edmonds_karp(flow_network, s=1, t=5)
 
-    print("\nHopcroft-Karp")
-    graph = GrafoBipartido(filename)
-    hopcroft_karp(graph)
+    """ Para executar o Hopcroft-Karp, instancie a classe GrafoBipartido """
+    # print("\nHopcroft-Karp")
+    # graph = GrafoBipartido(filename)
+    # hopcroft_karp(graph)
 
-    print("\nColoração de vértices")
-    # ...
+    """ Para executar o Lawler, instancie a classe Grafo """
+    # print("\nColoração de vértices")
+    # graph = Grafo(filename)
+    # lawler(graph)
